@@ -68,6 +68,7 @@ module op_module#(
   generate
     for(i = 0; i < N_INPUTS; i = i + 1) begin
       always_comb begin
+        man_values[i] = 'd0;
         sum[i] = A[i] + B[i];
         case (cmd)
           READ: begin
@@ -125,22 +126,22 @@ module op_module#(
 	else op_done = 1'b0;
   end
 
-  // logic [7:0] dummy;
-  // assign dummy = 8'b0;
+  logic [7:0] dummy;
+  assign dummy = 8'b0;
 
-  // ila_0 ILA_2 (
-  //   .clk(clk), // input wire clk
+  ila_0 ILA_2 (
+    .clk(clk), // input wire clk
 
-  //   .probe0(reset), // input wire [0:0]  probe0  
-  //   .probe1(enable), // input wire [0:0]  probe1 
-  //   .probe2(op_done), // input wire [0:0]  probe2 
-  //   .probe3(bram_sel), // input wire [0:0]  probe3 
-  //   .probe4(1'b0), // input wire [0:0]  probe4 
-  //   .probe5(1'b0), // input wire [0:0]  probe5 
-  //   .probe6(result[1023]), // input wire [7:0]  probe6 
-  //   .probe7(out[1023]), // input wire [7:0]  probe7 
-  //   .probe8(A[1023]), // input wire [7:0]  probe8 
-  //   .probe9(cmd) // input wire [7:0]  probe9
-  // );
+    .probe0(reset), // input wire [0:0]  probe0  
+    .probe1(enable), // input wire [0:0]  probe1 
+    .probe2(op_done), // input wire [0:0]  probe2 
+    .probe3(bram_sel), // input wire [0:0]  probe3 
+    .probe4(1'b0), // input wire [0:0]  probe4 
+    .probe5(1'b0), // input wire [0:0]  probe5 
+    .probe6(result[1023]), // input wire [7:0]  probe6 
+    .probe7(out[1023]), // input wire [7:0]  probe7 
+    .probe8(A[1023]), // input wire [7:0]  probe8 
+    .probe9(cmd) // input wire [7:0]  probe9
+  );
 
 endmodule

@@ -59,7 +59,12 @@ module coprocessor #(
   logic write_enable, write_done, read_block_enable, read_done, tx_done, tx_enable;
   logic op_done, op_fsm_enable, op_fsm_done, op_enable;
 
+  logic man_done, man_conv_bcd, man_done_bcd;
+  logic [11:0] man_bcd_out;
+  logic [31:0] seven_seg_data;
+
   assign out_write = op_fsm_done;
+  assign man_done = (cmd_dec == MAN_CMD) & out_write;
 
   fsm_main_ctrl MAIN_CTRL (
     .clk(clk),
@@ -162,7 +167,44 @@ module coprocessor #(
       write_enable_b = 1'b0;
       write_data_b = 8'd0;
     end
+  end  
+
+  always_ff @(posedge clk) begin
+    if (~reset) seven_seg_data <= 32'hCCCCCCCC;
+
+    if (man_done) man_conv_bcd <= 1'b1; 
+    else man_conv_bcd <= 1'b0;
+
+    if (man_done_bcd) begin
+      seven_seg_data[11:0] <= man_bcd_out;
+      seven_seg_data[31:12] <= 'hCCCCC;
+    end
   end
+
+  Binary_to_BCD #(
+    .INPUT_WIDTH(8),
+    .DECIMAL_DIGITS(3)
+  )
+  man_bcd
+  (
+    .i_Clock(clk),
+    .i_Binary(out_data[MEMORY_DEPTH - 1]),
+    .i_Start(man_conv_bcd),
+    .o_BCD(man_bcd_out),
+    .o_DV(man_done_bcd)
+  );
+
+  seven_seg_controller #(
+    .CLK_FREQUENCY('d50_000_000)
+  )
+  seven_seg_mod
+  (
+    .clk,
+    .resetN(reset),
+    .data(seven_seg_data),
+    .cat_out(CAT),
+    .an_out(AN)
+  );
   
   // logic [7:0] cmd_8bit;
   
