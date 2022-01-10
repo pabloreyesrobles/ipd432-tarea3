@@ -68,6 +68,7 @@ module op_module#(
   generate
     for(i = 0; i < N_INPUTS; i = i + 1) begin
       always_comb begin
+        man_values[i] = 'd0;
         sum[i] = A[i] + B[i];
         case (cmd)
           READ: begin
