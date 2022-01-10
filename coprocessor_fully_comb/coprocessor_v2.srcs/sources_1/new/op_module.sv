@@ -39,7 +39,7 @@ module op_module#(
   parameter N_INPUTS = 1024,
   parameter I_WIDTH = 8,
   parameter CMD_WIDTH = 3,
-  parameter CYCLES_WAIT = 11
+  parameter CYCLES_WAIT = 1
   )
   (
   	input logic clk,
@@ -99,32 +99,18 @@ module op_module#(
 
 // ADDER TREE COMBINACIONAL
 
-  // adder_tree #(
-  // 	.INPUTS(N_INPUTS),
-  // 	.INPUT_WIDTH(I_WIDTH)
-  // )
-  // ADD_TREE
-  // (
-  // 	.enable(1'b1),
-  // 	.input_bus(man_values),
-  // 	.output_bus(man_result)
-  // );
-
-//----------------------------
-// ADDER TREE PIPELINED
-  adder_tree_ff #(
-  .INPUTS(N_INPUTS),
-  .INPUT_WIDTH(I_WIDTH)
+  adder_tree #(
+  	.INPUTS(N_INPUTS),
+  	.INPUT_WIDTH(I_WIDTH)
   )
-  ADD_TREE_FF
+  ADD_TREE
   (
-  .clk(clk),
-  .reset(reset),
-  .enable(enable),
-  .input_bus(man_values),
-  .output_bus(man_result)
+  	.enable(1'b1),
+  	.input_bus(man_values),
+  	.output_bus(man_result)
   );
-//----------------------------
+
+
   always_ff @ (posedge clk) begin
 	  if(reset) counter <= 'd0;
 	  else begin
