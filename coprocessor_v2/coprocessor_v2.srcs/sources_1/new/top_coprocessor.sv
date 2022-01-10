@@ -149,29 +149,29 @@ module top_coprocessor(
   assign JA[0] = UART_TXD_IN;
   assign JA[1] = UART_RXD_OUT;
 
-  // logic [7:0] cmd_8bit;
-  // logic [7:0] dummy;
-  // assign dummy = 8'b0;
+  logic [7:0] cmd_8bit;
+  logic [7:0] dummy;
+  assign dummy = 8'b0;
   
-  // always_ff @(posedge CLK50MHZ) begin
-  //   if (~CPU_RESETN) cmd_8bit <= 8'd0;
-  //   else cmd_8bit[CMD_WIDTH - 1:0] <= cmd_dec[CMD_WIDTH - 1:0];
-  // end
+  always_ff @(posedge CLK50MHZ) begin
+    if (~CPU_RESETN) cmd_8bit <= 8'd0;
+    else cmd_8bit[CMD_WIDTH - 1:0] <= cmd_dec[CMD_WIDTH - 1:0];
+  end
   
-  // ila_0 ILA_0 (
-  //   .clk(CLK50MHZ), // input wire clk
+  ila_0 ILA_0 (
+    .clk(CLK50MHZ), // input wire clk
 
-  //   .probe0(cmd_flag), // input wire [0:0]  probe0  
-  //   .probe1(core_lock), // input wire [0:0]  probe1 
-  //   .probe2(out_write), // input wire [0:0]  probe2 
-  //   .probe3(bram_sel), // input wire [0:0]  probe3 
-  //   .probe4(write_enable_a), // input wire [0:0]  probe4 
-  //   .probe5(tx_start), // input wire [0:0]  probe5 
-  //   .probe6(rx_data), // input wire [7:0]  probe6 
-  //   .probe7(tx_data), // input wire [7:0]  probe7 
-  //   .probe8(read_data_a[1023]), // input wire [7:0]  probe8 
-  //   .probe9(out_data[1023]) // input wire [7:0]  probe9
-  // );
+    .probe0(cmd_flag), // input wire [0:0]  probe0  
+    .probe1(core_lock), // input wire [0:0]  probe1 
+    .probe2(out_write), // input wire [0:0]  probe2 
+    .probe3(bram_sel), // input wire [0:0]  probe3 
+    .probe4(write_enable_a), // input wire [0:0]  probe4 
+    .probe5(tx_start), // input wire [0:0]  probe5 
+    .probe6(rx_data), // input wire [7:0]  probe6 
+    .probe7(tx_data), // input wire [7:0]  probe7 
+    .probe8(read_data_a[1023]), // input wire [7:0]  probe8 
+    .probe9(out_data[1023]) // input wire [7:0]  probe9
+  );
   
   
 endmodule
