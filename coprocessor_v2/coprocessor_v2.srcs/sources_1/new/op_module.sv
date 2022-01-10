@@ -39,7 +39,7 @@ module op_module#(
   parameter N_INPUTS = 1024,
   parameter I_WIDTH = 8,
   parameter CMD_WIDTH = 3,
-  parameter CYCLES_WAIT = 1
+  parameter CYCLES_WAIT = 11
   )
   (
   	input logic clk,
@@ -95,24 +95,43 @@ module op_module#(
 //    else out = 'd0;
 //  end
 
-  adder_tree #(
-  	.INPUTS(N_INPUTS),
-  	.INPUT_WIDTH(I_WIDTH)
-  )
-  ADD_TREE
-  (
-  	.enable(1'b1),
-  	.input_bus(man_values),
-  	.output_bus(man_result)
-  );
 
+
+// ADDER TREE COMBINACIONAL
+
+  // adder_tree #(
+  // 	.INPUTS(N_INPUTS),
+  // 	.INPUT_WIDTH(I_WIDTH)
+  // )
+  // ADD_TREE
+  // (
+  // 	.enable(1'b1),
+  // 	.input_bus(man_values),
+  // 	.output_bus(man_result)
+  // );
+
+//----------------------------
+// ADDER TREE PIPELINED
+  adder_tree_ff #(
+  .INPUTS(N_INPUTS),
+  .INPUT_WIDTH(I_WIDTH)
+  )
+  ADD_TREE_FF
+  (
+  .clk(clk),
+  .reset(reset),
+  .enable(enable),
+  .input_bus(man_values),
+  .output_bus(man_result)
+  );
+//----------------------------
   always_ff @ (posedge clk) begin
 	  if(reset) counter <= 'd0;
 	  else begin
 		  if(enable) begin
 		  	if(counter == CYCLES_WAIT-1) counter <= 'd0;
 			else counter <= counter + 'd1;
-			out <= result;
+			//out <= result;
 		  end
 		  else counter <= 'd0;
 	  end
@@ -126,22 +145,13 @@ module op_module#(
 	else op_done = 1'b0;
   end
 
-  logic [7:0] dummy;
-  assign dummy = 8'b0;
-
-  ila_0 ILA_2 (
-    .clk(clk), // input wire clk
-
-    .probe0(reset), // input wire [0:0]  probe0  
-    .probe1(enable), // input wire [0:0]  probe1 
-    .probe2(op_done), // input wire [0:0]  probe2 
-    .probe3(bram_sel), // input wire [0:0]  probe3 
-    .probe4(1'b0), // input wire [0:0]  probe4 
-    .probe5(1'b0), // input wire [0:0]  probe5 
-    .probe6(result[1023]), // input wire [7:0]  probe6 
-    .probe7(out[1023]), // input wire [7:0]  probe7 
-    .probe8(A[1023]), // input wire [7:0]  probe8 
-    .probe9(cmd) // input wire [7:0]  probe9
-  );
+  //FLOP RESULT
+  always_ff @ (posedge clk) begin
+    if(reset) out <= 'd0;
+    else begin
+      if(op_done) out <= result;
+      else out <= out;
+    end
+  end
 
 endmodule
