@@ -1,6 +1,11 @@
 # coprocessorTesting.py
 import numpy as np
 from dev_cmd import *
+import argparse
+
+ap = argparse.ArgumentParser()
+ap.add_argument('-port', nargs=1, required=True)
+opt = ap.parse_args()
 
 np.random.seed()
 
@@ -28,7 +33,7 @@ euc_host = np.linalg.norm(A - B)
 
 # IMPORTANTE: cambiar el puerto serial según indique el administrador
 # de dispositivos de su equipo
-COM_port = 'COM4'
+COM_port = opt.port[0]
 
 # Operación de escritura
 write_to_dev('VectorA.npy', 'BRAMA', COM_port)
@@ -38,24 +43,19 @@ write_to_dev('VectorB.npy', 'BRAMB', COM_port)
 vecA_device = cmd_to_dev('readVec', 'BRAMA', COM_port)
 vecB_device = cmd_to_dev('readVec', 'BRAMB', COM_port)
 
-# # Sumas y promedios
+# Sumas y promedios
 sum_vec_device = cmd_to_dev('sumVec', com=COM_port)
 avg_vec_device = cmd_to_dev('avgVec', com=COM_port)
 
-# print(avg_vec_device, avg_vec_host)
-
-# # Cálculo de distancias
+# Cálculo de distancias
 man_device = cmd_to_dev('manDist', com=COM_port)
-# euc_device = cmd_to_dev('eucDist', com=COM_port)
 
 # # Errores de cómputo entre lo calculado por el host y el device
 sum_vec_diff = np.sum(sum_vec_host - sum_vec_device)
 avg_vec_diff = np.sum(avg_vec_host - avg_vec_device)
 man_diff = man_host - man_device
-# euc_diff = euc_host - euc_device
 
 print('Suma de errores en la operación suma: {}'.format(sum_vec_diff))
 print('Suma de errores en la operación promedio: {}'.format(avg_vec_diff))
 print('Distancia de Manhattan. Host: {} - Device: {} - Diff: {}'.format(man_host, man_device, man_diff))
-# print('Distancia euclideana. Host: {:.2f} - Device: {} - Diff: {:.2f}'.format(euc_host, euc_device, euc_diff))
 
