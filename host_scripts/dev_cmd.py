@@ -8,8 +8,8 @@ import serial
 # En caso de que no se opere sobre una BRAM específica la FPGA ignorará el
 # bit 4 del byte de control
 
-bram_map = {'BRAMA': 0, 
-            'BRAMB': 1} 
+bram_map = {'BRAMA': 0,
+            'BRAMB': 1}
 cmd_map = {'writeVec':  1,
            'readVec':   2,
            'sumVec':    3,
@@ -31,21 +31,35 @@ def cmd_to_dev(cmd, bram=None, com=None):
     # Envío de comando de control
     ser.write(ctrl.tobytes())
 
-    # Para este trabajo todas las operaciones han sido truncadas a 8 bits, es decir 
-    # los 1024 bytes menos significativos de las sumas y promedios de cada elemento
-    # de los vectores, y el byte menos significativo en el caso de Manhattan
+    # En caso de ser operaciones de lectura, suma o promedio se espera el
+    # envío de 1024 bytes desde el device.
+    # Para la suma de vectores se reciben 2048 bytes para evitar truncamiento.
+    # La distancia de Manhattan recibe 3 bytes concatenables y la euclideana
+    # 2 bytes concatenables.
+    # if cmd == 'readVec':
+    #   data = ser.read(1024)
+    #   return np.array(list(data))
+    # elif cmd == 'sumVec':
+    #   data = np.array(list(ser.read(1024)), dtype=np.uint8)
+    #   return data
+    # elif cmd == 'avgVec':
+    #   data = np.array(list(ser.read(1024)), dtype=np.uint8)
+    #   return data
+    # elif cmd == 'manDist':
+    #   data = int.from_bytes(ser.read(1), byteorder='big')
+    #   return data
     if cmd == 'readVec':
-      data = ser.read(1024)
-      return np.array(list(data))
+      data = np.array(list(ser.read(3072)), dtype=np.uint16).reshape(1024, 3)
+      return data[:, 1]
     elif cmd == 'sumVec':
-      data = np.array(list(ser.read(1024)), dtype=np.uint8)
-      return data
+      data = np.array(list(ser.read(3072)), dtype=np.uint16).reshape(1024, 3)
+      return (data[:, 2] << 8) + data[:, 1]
     elif cmd == 'avgVec':
-      data = np.array(list(ser.read(1024)), dtype=np.uint8)
-      return data
+      data = np.array(list(ser.read(3072)), dtype=np.uint16).reshape(1024, 3)
+      return (data[:, 2] << 8) + data[:, 1] + (data[:, 0] >> 7) / 2.0
     elif cmd == 'manDist':
-      data = int.from_bytes(ser.read(1), byteorder='big')
-      return data
+      data = np.array(list(ser.read(3)), dtype=np.uint16)
+      return ((data[2] << 16) + (data[1] << 8) + data[0])
 
 # La función de escritura sobre una BRAM a diferencia de cmd_to_dev
 # requiere de la especificación del bloque objetivo

@@ -12,8 +12,8 @@ np.random.seed()
 N = 1024
 
 # Se generan N números aleatorios de 0 a 255
-A = np.random.randint(0, high=255, size=N, dtype=np.uint8)
-B = np.random.randint(0, high=255, size=N, dtype=np.uint8)
+A = np.random.randint(0, high=255, size=N, dtype=np.int16)
+B = np.random.randint(0, high=255, size=N, dtype=np.int16)
 
 # Se almacenan los vectores en formato .npy para acelerar la lectura
 # posterior
@@ -23,14 +23,13 @@ np.save('VectorB.npy', B)
 # NumPy se encarga de forma automática de la suma elemento a elemento
 # de los vectores, así como la división de sus elementos por un escalar
 sum_vec_host = A + B
-avg_vec_host = ((A + B) / 2).astype(np.uint8)
+avg_vec_host = ((A + B) / 2)
 
 # En la FPGA se calcula el valor absoluto comparando los operandos previo
 # a la operación para restar el mayor de los dos valores leídos de la
 # BRAMA y BRAMB del menor
-man_host = np.uint8(np.linalg.norm(A.astype(np.int16) - B.astype(np.int16), ord=1))
+man_host = np.linalg.norm(A - B, ord=1)
 euc_host = np.linalg.norm(A - B)
-
 # IMPORTANTE: cambiar el puerto serial según indique el administrador
 # de dispositivos de su equipo
 COM_port = opt.port[0]
@@ -58,4 +57,3 @@ man_diff = man_host - man_device
 print('Suma de errores en la operación suma: {}'.format(sum_vec_diff))
 print('Suma de errores en la operación promedio: {}'.format(avg_vec_diff))
 print('Distancia de Manhattan. Host: {} - Device: {} - Diff: {}'.format(man_host, man_device, man_diff))
-

@@ -30,11 +30,12 @@ module tx_control #(
     input logic enable,
     input logic tx_busy,
     output logic tx_start,
-    output logic shift,
+    output logic shift_0,
+    output logic shift_1,
     output logic done
   );
 
-  typedef enum logic [2:0] {IDLE, TX, WAIT, SHIFT, DONE} state;
+  typedef enum logic [3:0] {IDLE, TX_1, WAIT_1, SHIFT_1, TX_2, WAIT_2, SHIFT_2, TX_3, WAIT_3, SHIFT, DONE} state;
   state pr_state, nx_state;
   logic max_address;
 
@@ -47,25 +48,56 @@ module tx_control #(
     nx_state = IDLE;
     tx_start = 1'b0;
     done = 1'b0;
-    shift = 1'b0;
+    shift_0 = 1'b0;
+    shift_1 = 1'b0;
     case (pr_state)
-      IDLE: if(enable) nx_state = TX;
+      IDLE: if(enable) nx_state = TX_1;
 
-      TX: begin
+      TX_1: begin
         tx_start = 1'b1;
-        nx_state = WAIT;;
+        nx_state = WAIT_1;
       end
 
-      WAIT: begin
-        if (tx_busy) nx_state = WAIT;
+      WAIT_1: begin
+        if(tx_busy) nx_state = WAIT_1;
+        else nx_state = SHIFT_1;
+      end
+
+      SHIFT_1: begin
+        nx_state = TX_2;
+        shift_0 = 1'b1;
+      end
+
+      TX_2: begin
+        tx_start = 1'b1;
+        nx_state = WAIT_2;
+      end
+
+      WAIT_2: begin
+        if(tx_busy) nx_state = WAIT_2;
+        else nx_state = SHIFT_2;
+      end
+
+      SHIFT_2: begin
+        nx_state = TX_3;
+        shift_0 = 1'b1;
+      end
+
+      TX_3: begin
+        tx_start = 1'b1;
+        nx_state = WAIT_3;
+      end
+
+      WAIT_3: begin
+        if(tx_busy) nx_state = WAIT_3;
         else nx_state = SHIFT;
       end
 
       SHIFT: begin
+        shift_1 = 1'b1;
         if (max_address) nx_state = DONE;
         else begin
-          nx_state = TX;
-          shift = 1'b1;
+          nx_state = TX_1;
         end
       end
 
@@ -84,7 +116,7 @@ module tx_control #(
   (
     .clk(clk),
     .reset(reset),
-    .enable(shift),
+    .enable(shift_1),
     .clear(done),
     .max_address(max_address)
   );
