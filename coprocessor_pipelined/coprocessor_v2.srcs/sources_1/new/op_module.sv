@@ -49,9 +49,19 @@ module op_module#(
     input logic bram_sel,
     input logic [N_INPUTS-1:0][I_WIDTH-1:0] A,
     input logic [N_INPUTS-1:0][I_WIDTH-1:0] B,
-    output logic [N_INPUTS-1:0][I_WIDTH-1:0] out,
+    output logic [N_INPUTS-1:0][I_WIDTH*3-1:0] out,
 	output logic op_done
   );
+
+  // 3 BYTES FIX
+  logic [N_INPUTS-1:0][I_WIDTH*3 -1 :0 ] AP, BP;
+  genvar j;
+  generate
+    for(j = 0; j < N_INPUTS; j++) begin
+      assign AP[j] = {8'd0, A[j], 8'd0};
+      assign BP[j] = {8'd0, B[j], 8'd0};
+    end
+  endgenerate
 
   // DONE FLAG COUNTER
   localparam  COUNTER_WIDTH = $clog2(CYCLES_WAIT);
@@ -59,9 +69,9 @@ module op_module#(
 
 
   enum logic [CMD_WIDTH-1:0]{WRITE = 3'd1, READ = 3'd2, SUM = 3'd3, AVG = 3'd4, MAN = 3'd5} commands;
-  logic [N_INPUTS-1:0][I_WIDTH-1:0] result, man_values;
-  logic [N_INPUTS-1:0][I_WIDTH-1:0] sum;
-  logic [I_WIDTH-1:0] man_result;
+  logic [N_INPUTS-1:0][I_WIDTH-1:0] man_values;
+  logic [N_INPUTS-1:0][I_WIDTH*3-1:0] sum,result;
+  logic [17:0] man_result;
   logic adder_enable;
 
   genvar i;
@@ -69,18 +79,18 @@ module op_module#(
     for(i = 0; i < N_INPUTS; i = i + 1) begin
       always_comb begin
         man_values[i] = 'd0;
-        sum[i] = A[i] + B[i];
+        sum[i] = AP[i] + BP[i];
         case (cmd)
           READ: begin
-            if(bram_sel) result[i] = B[i];
-            else result[i] = A[i];
+            if(bram_sel) result[i] = BP[i];
+            else result[i] = AP[i];
           end
           SUM: result[i] = sum[i];
           AVG: result[i] = (sum[i]>>1);
           MAN: begin
             if(A[i] >= B[i]) man_values[i] = A[i] - B[i];
             else man_values[i] = B[i] - A[i];
-			if(i == N_INPUTS-1) result[N_INPUTS-1] = man_result;
+			if(i == N_INPUTS-1) result[N_INPUTS-1] = {6'd0, man_result};
 			else result[i] = 'd0;
           end
           default: result[i] = 'd0;

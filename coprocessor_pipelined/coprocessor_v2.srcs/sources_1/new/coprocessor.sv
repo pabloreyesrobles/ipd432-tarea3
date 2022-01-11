@@ -43,9 +43,10 @@ module coprocessor #(
     output logic [7:0] write_data_b,
     output logic tx_start,
     output logic core_lock,
-    output logic [MEMORY_DEPTH - 1:0] [7:0] out_data,
+    output logic [MEMORY_DEPTH - 1:0] [23:0] out_data,
     output logic out_write,
     output logic out_shift,
+    output logic shift_byte,
     output logic [6:0] CAT,
     output logic [7:0] AN
   );
@@ -60,7 +61,7 @@ module coprocessor #(
   logic op_done, op_fsm_enable, op_fsm_done, op_enable;
 
   logic man_done, man_conv_bcd, man_done_bcd;
-  logic [11:0] man_bcd_out;
+  logic [23:0] man_bcd_out;
   logic [31:0] seven_seg_data;
 
   assign out_write = op_fsm_done;
@@ -144,7 +145,8 @@ module coprocessor #(
     .enable(tx_enable),
     .tx_busy(tx_busy),
     .tx_start(tx_start),
-    .shift(out_shift),
+    .shift_0(shift_byte),
+    .shift_1(out_shift),
     .done(tx_done)
   );
 
@@ -167,23 +169,23 @@ module coprocessor #(
       write_enable_b = 1'b0;
       write_data_b = 8'd0;
     end
-  end  
+  end
 
   always_ff @(posedge clk) begin
     if (~reset) seven_seg_data <= 32'hCCCCCCCC;
 
-    if (man_done) man_conv_bcd <= 1'b1; 
+    if (man_done) man_conv_bcd <= 1'b1;
     else man_conv_bcd <= 1'b0;
 
     if (man_done_bcd) begin
-      seven_seg_data[11:0] <= man_bcd_out;
-      seven_seg_data[31:12] <= 'hCCCCC;
+      seven_seg_data[23:0] <= man_bcd_out;
+      seven_seg_data[31:24] <= 'hCC;
     end
   end
 
   Binary_to_BCD #(
-    .INPUT_WIDTH(8),
-    .DECIMAL_DIGITS(3)
+    .INPUT_WIDTH(24),
+    .DECIMAL_DIGITS(6)
   )
   man_bcd
   (
@@ -205,28 +207,28 @@ module coprocessor #(
     .cat_out(CAT),
     .an_out(AN)
   );
-  
+
   // logic [7:0] cmd_8bit;
-  
+
   // always_ff @(posedge clk) begin
   //   if (~reset) cmd_8bit <= 8'd0;
   //   else cmd_8bit[CMD_WIDTH - 1:0] <= cmd_dec[CMD_WIDTH - 1:0];
   // end
-  
+
   // ila_0 ILA_0 (
   //   .clk(clk), // input wire clk
 
-  //   .probe0(cmd_flag), // input wire [0:0]  probe0  
-  //   .probe1(core_lock), // input wire [0:0]  probe1 
-  //   .probe2(op_done), // input wire [0:0]  probe2 
-  //   .probe3(bram_sel), // input wire [0:0]  probe3 
-  //   .probe4(tx_enable), // input wire [0:0]  probe4 
-  //   .probe5(tx_done), // input wire [0:0]  probe5 
-  //   .probe6(rx_data), // input wire [7:0]  probe6 
-  //   .probe7(tx_data), // input wire [7:0]  probe7 
-  //   .probe8(read_data_a[1023]), // input wire [7:0]  probe8 
+  //   .probe0(cmd_flag), // input wire [0:0]  probe0
+  //   .probe1(core_lock), // input wire [0:0]  probe1
+  //   .probe2(op_done), // input wire [0:0]  probe2
+  //   .probe3(bram_sel), // input wire [0:0]  probe3
+  //   .probe4(tx_enable), // input wire [0:0]  probe4
+  //   .probe5(tx_done), // input wire [0:0]  probe5
+  //   .probe6(rx_data), // input wire [7:0]  probe6
+  //   .probe7(tx_data), // input wire [7:0]  probe7
+  //   .probe8(read_data_a[1023]), // input wire [7:0]  probe8
   //   .probe9(out_data[1023]) // input wire [7:0]  probe9
   // );
-  
+
 
 endmodule
