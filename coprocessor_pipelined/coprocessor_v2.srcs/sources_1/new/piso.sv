@@ -45,7 +45,7 @@ always_comb begin
   if(cnt == 'd2) data_out = buff[MEM_SIZE - 1][23:16];
   else if (cnt == 'd1) data_out = buff[MEM_SIZE - 1][15:8];
   else data_out = buff[MEM_SIZE - 1][7:0];
-  
+
 end
 
 endmodule

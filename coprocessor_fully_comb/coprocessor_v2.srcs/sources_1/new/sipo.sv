@@ -2,10 +2,10 @@ module sipo_reg #(
   parameter MEM_SIZE = 1024
 )
 (
-  input clk,
-  input write_enable,
-  input [7:0] data_in,
-  output [MEM_SIZE-1:0] [7:0] data_out
+  input logic clk,
+  input logic write_enable,
+  input logic [7:0] data_in,
+  output logic [MEM_SIZE-1:0] [7:0] data_out
 );
 
 logic [MEM_SIZE-1:0] [7:0] buff;

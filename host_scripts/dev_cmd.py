@@ -31,11 +31,9 @@ def cmd_to_dev(cmd, bram=None, com=None):
     # Envío de comando de control
     ser.write(ctrl.tobytes())
 
-    # En caso de ser operaciones de lectura, suma o promedio se espera el
-    # envío de 1024 bytes desde el device.
-    # Para la suma de vectores se reciben 2048 bytes para evitar truncamiento.
-    # La distancia de Manhattan recibe 3 bytes concatenables y la euclideana
-    # 2 bytes concatenables.
+    # Para este trabajo todas las operaciones han sido truncadas a 8 bits, es decir 
+    # los 1024 bytes menos significativos de las sumas y promedios de cada elemento
+    # de los vectores, y el byte menos significativo en el caso de Manhattan
     if cmd == 'readVec':
       data = ser.read(1024)
       return np.array(list(data))
@@ -48,18 +46,6 @@ def cmd_to_dev(cmd, bram=None, com=None):
     elif cmd == 'manDist':
       data = int.from_bytes(ser.read(1), byteorder='big')
       return data
-    # elif cmd == 'sumVec':
-    #   data = np.array(list(ser.read(2048)), dtype=np.uint16).reshape(1024, 2)
-    #   return (data[:, 0] << 8) + data[:, 1]
-    # elif cmd == 'avgVec':
-    #   data = np.array(list(ser.read(2048)), dtype=np.uint16).reshape(1024, 2)
-    #   return data[:, 0] + (data[:, 1] >> 7) / 2.0
-    # elif cmd == 'manDist':
-    #   data = np.array(list(ser.read(3)), dtype=np.int32)
-    #   return ((data[0] << 16) + (data[1] << 8) + data[2])
-    # else: # eucDist
-    #   data = np.array(list(ser.read(2)), dtype=np.int32)
-    #   return ((data[0] << 8) + data[1])
 
 # La función de escritura sobre una BRAM a diferencia de cmd_to_dev
 # requiere de la especificación del bloque objetivo
