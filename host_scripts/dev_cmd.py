@@ -32,22 +32,10 @@ def cmd_to_dev(cmd, bram=None, com=None):
     ser.write(ctrl.tobytes())
 
     # En caso de ser operaciones de lectura, suma o promedio se espera el
-    # envío de 1024 bytes desde el device.
-    # Para la suma de vectores se reciben 2048 bytes para evitar truncamiento.
-    # La distancia de Manhattan recibe 3 bytes concatenables y la euclideana
-    # 2 bytes concatenables.
-    # if cmd == 'readVec':
-    #   data = ser.read(1024)
-    #   return np.array(list(data))
-    # elif cmd == 'sumVec':
-    #   data = np.array(list(ser.read(1024)), dtype=np.uint8)
-    #   return data
-    # elif cmd == 'avgVec':
-    #   data = np.array(list(ser.read(1024)), dtype=np.uint8)
-    #   return data
-    # elif cmd == 'manDist':
-    #   data = int.from_bytes(ser.read(1), byteorder='big')
-    #   return data
+    # envío de 3072 bytes desde el device.
+    # Para cada operación se utilizan 3 bytes para concatenar, según sea la operación.
+    # Por ejemplo el promedio requiere de 3 bytes para un precisión completa de los resultados.
+    # La distancia de Manhattan recibe 3 bytes concatenables
     if cmd == 'readVec':
       data = np.array(list(ser.read(3072)), dtype=np.uint16).reshape(1024, 3)
       return data[:, 1]
