@@ -12,7 +12,10 @@
 Es necesario indicar el puerto serial asociado como argumento del llamado a coprocessorTesting.py
 
 ```
-python coprocessorTesting.py -port=COMx
+python coprocessorTesting.py -port=COMx -trials N
 ```
 
-Los resutados de las operaciones vectoriales y de Manhattan han sido truncadas a 8 bits, por tanto se evalúan los bits menos significativos de cada una de las operaciones.
+**Nota: El argumento `-trials` indica el numero de pruebas a realizar, por defecto, sino se pasa este argumento se realiza una prueba**
+
+
+Los resultados de las operaciones vectoriales y de Manhattan han sido truncadas a 8 bits, por tanto se evalúan los bits menos significativos de cada una de las operaciones.
