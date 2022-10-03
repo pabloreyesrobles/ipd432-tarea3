@@ -84,7 +84,6 @@ while i < TRIALS:
         i += 1
         retry = False
     except:
-        print('Retrying')
         retry = True
 
 # # Fin de los trials
