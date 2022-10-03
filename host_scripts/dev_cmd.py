@@ -37,11 +37,11 @@ def cmd_to_dev(cmd, bram=None, com=None):
     # Por ejemplo el promedio requiere de 3 bytes para un precisión completa de los resultados.
     # La distancia de Manhattan recibe 3 bytes concatenables
     if cmd == 'readVec':
-      data = np.array(list(ser.read(3072)), dtype=np.uint16).reshape(1024, 3)
+      data = np.array(list(ser.read(3072))).reshape(1024, 3)
       return data[:, 1]
     elif cmd == 'sumVec':
-      data = np.array(list(ser.read(3072)), dtype=np.uint16).reshape(1024, 3)
-      return (data[:, 2] << 8) + data[:, 1]
+      data = np.array(list(ser.read(3072))).reshape(1024, 3)
+      return np.abs((data[:, 2] << 8) + data[:, 1])
     elif cmd == 'avgVec':
       data = np.array(list(ser.read(3072)), dtype=np.uint16).reshape(1024, 3)
       return (data[:, 2] << 8) + data[:, 1] + (data[:, 0] >> 7) / 2.0
